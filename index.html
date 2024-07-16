@@ -1,36 +1,23 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MOHAMMAD UMAR Player</title>
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h4>MOHAMMAD UMAR PLAYER</h4>
-        <div id="player-container"></div>
-    </div>
+    <title>Custom Video Player</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="video-player">
-        <video id="video" width="100%" height="100%" controls>
-            <source src="video.mp4" type="video/mp4">
+    <div class="video-container">
+        <video id="video" width="600" controls>
+            <source src="path/to/your/video.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
         <div class="controls">
-            <button id="play-pause" aria-label="Play/Pause"></button>
-            <button id="mute" aria-label="Mute/Unmute"></button>
-            <button id="fullscreen" aria-label="Fullscreen"></button>
-            <div class="progress-bar">
-                <div class="progress" id="progress"></div>
-            </div>
-            <div class="time-display" id="time-display"></div>
+            <button id="playPause">Play</button>
+            <input type="range" id="progress" value="0" max="100">
+            <span id="time">00:00</span>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
