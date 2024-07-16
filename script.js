@@ -1,59 +1,28 @@
-// script.js
 const video = document.getElementById('video');
-const playPauseButton = document.getElementById('play-pause');
-const muteButton = document.getElementById('mute');
-const fullscreenButton = document.getElementById('fullscreen');
-const progressBar = document.getElementById('progress');
-const timeDisplay = document.getElementById('time-display');
+const playPauseBtn = document.getElementById('playPause');
+const progress = document.getElementById('progress');
+const time = document.getElementById('time');
 
-let isPlaying = false;
-let isMuted = false;
-let isFullscreen = false;
-
-playPauseButton.addEventListener('click', () => {
-    if (isPlaying) {
-        video.pause();
-        playPauseButton.innerHTML = 'Play';
-    } else {
+playPauseBtn.addEventListener('click', () => {
+    if (video.paused) {
         video.play();
-        playPauseButton.innerHTML = 'Pause';
-    }
-    isPlaying =!isPlaying;
-});
-
-muteButton.addEventListener('click', () => {
-    if (isMuted) {
-        video.muted = false;
-        muteButton.innerHTML = 'Mute';
+        playPauseBtn.textContent = 'Pause';
     } else {
-        video.muted = true;
-        muteButton.innerHTML = 'Unmute';
+        video.pause();
+        playPauseBtn.textContent = 'Play';
     }
-    isMuted =!isMuted;
-});
-
-fullscreenButton.addEventListener('click', () => {
-    if (isFullscreen) {
-        document.exitFullscreen();
-        fullscreenButton.innerHTML = 'Fullscreen';
-    } else {
-        video.requestFullscreen();
-        fullscreenButton.innerHTML = 'Exit Fullscreen';
-    }
-    isFullscreen =!isFullscreen;
 });
 
 video.addEventListener('timeupdate', () => {
-    const currentTime = video.currentTime;
-    const duration = video.duration;
-    const progress = (currentTime / duration) * 100;
-    progressBar.style.width = `${progress}%`;
-    timeDisplay.innerHTML = `${formatTime(currentTime)} / ${formatTime(duration)}`;
+    const progressValue = (video.currentTime / video.duration) * 100;
+    progress.value = progressValue;
+
+    const minutes = Math.floor(video.currentTime / 60);
+    const seconds = Math.floor(video.currentTime % 60);
+    time.textContent = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 });
 
-function formatTime(time) {
-    const hours = Math.floor(time / 3600);
-    const minutes = Math.floor((time % 3600) / 60);
-    const seconds = Math.floor(time % 60);
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
+progress.addEventListener('input', () => {
+    const newTime = (progress.value / 100) * video.duration;
+    video.currentTime = newTime;
+});
