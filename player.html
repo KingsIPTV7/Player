@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Multi-Format Player</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to right, #0f0f0f, #1a1a1a);
+      color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    h2 {
+      font-size: 2em;
+      margin-bottom: 30px;
+      color: #00ffd9;
+      text-shadow: 0 0 10px rgba(0, 255, 217, 0.5);
+    }
+
+    video {
+      width: 100%;
+      max-width: 1080px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+      margin-bottom: 30px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 12px 16px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #222;
+      color: #0ff;
+      outline: none;
+      box-shadow: inset 0 0 5px rgba(0, 255, 255, 0.2);
+      transition: 0.3s;
+    }
+
+    input:focus {
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    }
+
+    button {
+      padding: 14px;
+      font-size: 16px;
+      font-weight: bold;
+      background: #00ffd9;
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #00c7aa;
+    }
+
+    @media (max-width: 768px) {
+      video {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h2>KingsIPTV's Player</h2>
+
+  <video id="video" controls autoplay poster="" playsinline></video>
+
+  <div class="input-group">
+    <input id="urlInput" placeholder="Enter video URL (.mpd, .m3u8, .mp4)">
+    <input id="keyIdInput" placeholder="Enter Key ID (hex)">
+    <input id="keyInput" placeholder="Enter Key (hex)">
+    <button onclick="loadVideo()">Load Video</button>
+  </div>
+
+  <script>
+    const video = document.getElementById('video');
+    const urlInput = document.getElementById('urlInput');
+    const keyIdInput = document.getElementById('keyIdInput');
+    const keyInput = document.getElementById('keyInput');
+
+    async function loadVideo() {
+      const url = urlInput.value.trim();
+      const keyId = keyIdInput.value.trim();
+      const key = keyInput.value.trim();
+
+      let clearKeys = null;
+      if (keyId && key) {
+        clearKeys = {};
+        clearKeys[keyId] = key;
+      }
+
+      if (window.shakaPlayer) {
+        await window.shakaPlayer.destroy();
+      }
+
+      if (url.endsWith('.mpd')) {
+        const player = new shaka.Player(video);
+        window.shakaPlayer = player;
+
+        if (clearKeys) {
+          player.configure({
+            drm: {
+              clearKeys: clearKeys
+            }
+          });
+        }
+
+        try {
+          await player.load(url);
+          console.log('DASH video loaded.');
+        } catch (e) {
+          console.error('Shaka failed to load:', e);
+        }
+
+      } else if (url.endsWith('.m3u8')) {
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(url);
+          hls.attachMedia(video);
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          video.src = url;
+        }
+      } else if (url.endsWith('.mp4') || url.endsWith('.mpeg')) {
+        video.src = url;
+      }
+    }
+
+    // Load video from ?link1= URL param
+    const params = new URLSearchParams(window.location.search);
+    const link = params.get('link1');
+    if (link) {
+      urlInput.value = link;
+      loadVideo();
+    }
+  </script>
+
+</body>
+</html>
